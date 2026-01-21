@@ -7,7 +7,7 @@ import authRouter from "./routes/auth";
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: process.env.NEXT_PUBLIC_URL,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   exposedHeaders: ['Authorization'],
@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.json({ 
-    message: "CRM API is running",
+    message: "Spin API is running",
     documentation: "/documentation"
   });
 });
