@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import serverless from "serverless-http";
 import app from "./app";
 import { connectDB } from "./config/db";
 dotenv.config();
@@ -14,4 +15,4 @@ connectDB().then(() => {
   process.exit(1);
 });
 
-export default app;
+export default serverless(app);
