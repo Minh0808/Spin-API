@@ -36,7 +36,7 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(null, {
     swaggerOptions: {
-      url: "/api-docs.json",
+      url:"/api-docs.json",
     },
   })
 );
