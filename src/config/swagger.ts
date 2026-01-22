@@ -10,9 +10,7 @@ export const swaggerSpec = swaggerJsdoc({
     },
     servers: [
       {
-        url: process.env.NODE_ENV === "production"
-          ? "https://spin-api-6pcg.onrender.com"
-          : "http://localhost:5000",
+        url: process.env.SWAGGER_HOST
       },
     ],
     components: {
