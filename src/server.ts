@@ -4,16 +4,15 @@ import app from "./app";
 import { connectDB } from "./config/db";
 dotenv.config();
 
+const PORT = process.env.PORT || 5000;
 
-let isConnected = false;
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+}).catch((error) => {
+  console.error("Failed to connect to the database", error);
+  process.exit(1);
+});
 
-const handler = async (req: any, res: any) => {
-  if (!isConnected) {
-    await connectDB();
-    isConnected = true;
-    console.log("✅ DB connected");
-  }
-  return app(req, res);
-};
-
-export default serverless(handler);
+export default serverless(app);
