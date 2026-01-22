@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --watch src --ext ts,js,tsx,json --exec \"tsx src/server.ts\"",
-    "build": "esbuild src/server.ts --bundle --platform=node --minify --outfile=dist/server.js",
     "start": "node dist/server.js"
   },
   "keywords": [],
