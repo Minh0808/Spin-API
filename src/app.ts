@@ -2,7 +2,7 @@ import cors from "cors";
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { buildSwaggerSpec } from "./config/swagger";
-import authRouter from "./routes/auth";
+import authRouter from "./routes/index";
 
 const app = express();
 
