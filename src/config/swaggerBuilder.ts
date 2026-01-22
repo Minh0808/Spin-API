@@ -1,4 +1,3 @@
-import { authSwagger } from "../routes/auth";
 import { convertJoi } from "./joiToSwagger";
 const authRoutes = require("../routes/auth");
 
@@ -42,8 +41,8 @@ const buildMethod = (config: any) => {
 };
 
 export const swaggerPaths = {
-  "/api/auth/register": { post: buildMethod(authSwagger.register) },
-  "/api/auth/login": { post: buildMethod(authSwagger.login) },
-  "/api/auth/logout": { post: buildMethod(authSwagger.logout) },
-  "/api/auth/profile": { get: buildMethod(authSwagger.getProfile) },
+  "/auth/register": { post: buildMethod(authRoutes.export.register) },
+  "/auth/login": { post: buildMethod(authRoutes.export.login) },
+  "/auth/logout": { post: buildMethod(authRoutes.export.logout) },
+  "/auth/profile": { get: buildMethod(authRoutes.export.getProfile) },
 };

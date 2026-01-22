@@ -2,7 +2,7 @@ import cors from "cors";
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { buildSwaggerSpec } from "./config/swagger";
-import authRouter from "./routes/index";
+import authRouter from "./routes/auth";
 
 const app = express();
 
@@ -31,12 +31,14 @@ app.get("/api-docs.json", (req, res) => {
   res.json(spec);
 });
 
-const swaggerSpec = buildSwaggerSpec();
-
 app.use(
   "/documentation",
   swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec)
+  swaggerUi.setup(null, {
+    swaggerOptions: {
+      url: "/api-docs.json",
+    },
+  })
 );
 
 app.use("/auth", authRouter);
