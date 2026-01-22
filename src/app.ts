@@ -31,14 +31,12 @@ app.get("/api-docs.json", (req, res) => {
   res.json(spec);
 });
 
+const swaggerSpec = buildSwaggerSpec();
+
 app.use(
   "/documentation",
   swaggerUi.serve,
-  swaggerUi.setup(null, {
-    swaggerOptions: {
-      url:"/api-docs.json",
-    },
-  })
+  swaggerUi.setup(swaggerSpec)
 );
 
 app.use("/auth", authRouter);
