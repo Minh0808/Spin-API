@@ -32,7 +32,7 @@ app.get("/api-docs.json", (req, res) => {
 });
 
 app.use(
-  "/documentation",
+  "/documenstation",
   swaggerUi.serve,
   swaggerUi.setup(null, {
     swaggerOptions: {
