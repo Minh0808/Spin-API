@@ -1,5 +1,5 @@
+import { authDocs } from "../routes/auth"; // Sửa lại import
 import { convertJoi } from "./joiToSwagger";
-const authRoutes = require("../routes/auth");
 
 const buildMethod = (config: any) => {
   const schema = config.validate?.payload
@@ -18,18 +18,18 @@ const buildMethod = (config: any) => {
     summary: config.description,
     security: config.auth ? [{ bearerAuth: [] }] : [],
     requestBody: config.validate?.payload
-  ? {
-      required: true,
-      content: {
-        "application/json": {
-          schema: convertJoi(config.validate.payload),
-        },
-        "application/x-www-form-urlencoded": {
-          schema: convertJoi(config.validate.payload),
+      ? {
+          required: true,
+          content: {
+            "application/json": {
+              schema: convertJoi(config.validate.payload),
+            },
+            "application/x-www-form-urlencoded": {
+              schema: convertJoi(config.validate.payload),
+            },
+          },
         }
-      },
-    }
-  : undefined,
+      : undefined,
 
     responses: Object.fromEntries(
       Object.entries(config.responses).map(([code, val]: any) => [
@@ -41,8 +41,8 @@ const buildMethod = (config: any) => {
 };
 
 export const swaggerPaths = {
-  "/auth/register": { post: buildMethod(authRoutes.export.register) },
-  "/auth/login": { post: buildMethod(authRoutes.export.login) },
-  "/auth/logout": { post: buildMethod(authRoutes.export.logout) },
-  "/auth/profile": { get: buildMethod(authRoutes.export.getProfile) },
+  "/auth/register": { post: buildMethod(authDocs.register) },
+  "/auth/login": { post: buildMethod(authDocs.login) },
+  "/auth/logout": { post: buildMethod(authDocs.logout) },
+  "/auth/profile": { get: buildMethod(authDocs.getProfile) },
 };

@@ -10,7 +10,7 @@ authRouter.post("/login", login);
 authRouter.post("/logout", authMiddleware, logout);
 authRouter.get("/profile", authMiddleware, getProfile);
 
-module.exports.export = {
+export const authDocs = {
   register: {
     tags: ["Auth"],
     description: "tạo mới user",
