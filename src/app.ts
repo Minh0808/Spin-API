@@ -31,11 +31,11 @@ app.get("/api-docs.json", (req, res) => {
 });
 
 app.use(
-  "/documenstation",
+  "/documentation",
   swaggerUi.serve,
   swaggerUi.setup(null, {
     swaggerOptions: {
-      url: "https://spin-api-6pcg.onrender.com/api-docs.json",
+      url: "/api-docs.json",
     },
   })
 );
