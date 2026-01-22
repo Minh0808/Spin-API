@@ -1,7 +1,7 @@
 import cors from "cors";
 import express from "express";
 import swaggerUi from "swagger-ui-express";
-import { buildSwaggerSpec } from "./config/swagger";
+import { swaggerSpec } from "./config/swagger";
 import authRouter from "./routes/auth";
 
 const app = express();
@@ -26,9 +26,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api-docs.json", (req, res) => {
-  const spec = buildSwaggerSpec();
   res.setHeader("Content-Type", "application/json");
-  res.json(spec);
+  res.json(swaggerSpec);
 });
 
 app.use(
