@@ -6,19 +6,19 @@ import Signup from "../models/signup";
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { phone, name, email, role, password } = req.body;
+    const { phone, name, email, role, password, rotationTimes } = req.body;
     if (!phone || !name || !email || !password)
       return res.status(400).json({ error: "Missing fields" });
 
-    const exists = await Signup.findOne({ email });
-    if (exists) return res.status(409).json({ error: "Email already exists" });
+    const exists = await Signup.findOne({ phone });
+    if (exists) return res.status(409).json({ error: "Phone already exists" });
 
     const hash = await bcrypt.hash(password, 10);
-    const signup = await Signup.create({ phone, name, email, role, password: hash });
+    const signup = await Signup.create({ phone, name, email, role, password: hash, rotationTimes });
 
     res.status(200).json({
       message: "Register successful",
-      user: { id: signup._id, phone: signup.phone, name: signup.name, email: signup.email, role: signup.role },
+      user: { id: signup._id, phone: signup.phone, name: signup.name, email: signup.email, role: signup.role, rotationTimes: signup.rotationTimes },
     });
   } catch (err) {
     console.error(err);
@@ -53,6 +53,7 @@ export const login = async (req: Request, res: Response) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        rotationTimes: user.rotationTimes,
       }
     });
   } catch (err) {
@@ -80,6 +81,41 @@ export const getProfile = async (req: Request, res: Response) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      rotationTimes: user.rotationTimes,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+    const updateData = req.body;
+    Object.keys(updateData).forEach(key => {
+      if (
+        updateData[key] === "" ||
+        updateData[key] === null ||
+        updateData[key] === undefined
+      ) {
+        delete updateData[key];
+      }
+    });
+
+    const user = await Signup.findByIdAndUpdate(userId, updateData, { new: true });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.json({
+      message: "User updated successfully",
+      user: {
+        id: user._id,
+        phone: user.phone,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        rotationTimes: user.rotationTimes,
+      }
     });
   } catch (err) {
     console.error(err);
