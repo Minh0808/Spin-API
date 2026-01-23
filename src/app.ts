@@ -2,12 +2,23 @@ import cors from "cors";
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
-import authRouter from "./routes/auth";
+import router from "./routes";
 
 const app = express();
 
+const allowedOrigins = [
+  process.env.NEXT_PUBLIC_URL,
+  "http://localhost:3000",
+  "http://localhost:5000",
+];
 const corsOptions = {
-  origin: process.env.NEXT_PUBLIC_URL || "http://localhost:3000",
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Not allowed by CORS"));
+  },
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   exposedHeaders: ['Authorization'],
@@ -40,6 +51,6 @@ app.use(
   })
 );
 
-app.use("/auth", authRouter);
+app.use("/", router)
 
 export default app;
