@@ -6,12 +6,9 @@ import router from "./routes";
 
 const app = express();
 
-app.use("/documentation", cors());
-
 app.use(
   cors({
     origin: "*",
-    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     exposedHeaders: ["Authorization"],
