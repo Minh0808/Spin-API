@@ -1566,13 +1566,13 @@ var require_lib = __commonJS({
             if (err) {
               next(err);
             } else {
-              var corsOptions2 = assign({}, defaults, options);
+              var corsOptions = assign({}, defaults, options);
               var originCallback = null;
-              if (corsOptions2.origin && typeof corsOptions2.origin === "function") {
-                originCallback = corsOptions2.origin;
-              } else if (corsOptions2.origin) {
+              if (corsOptions.origin && typeof corsOptions.origin === "function") {
+                originCallback = corsOptions.origin;
+              } else if (corsOptions.origin) {
                 originCallback = function(origin, cb) {
-                  cb(null, corsOptions2.origin);
+                  cb(null, corsOptions.origin);
                 };
               }
               if (originCallback) {
@@ -1580,8 +1580,8 @@ var require_lib = __commonJS({
                   if (err2 || !origin) {
                     next(err2);
                   } else {
-                    corsOptions2.origin = origin;
-                    cors2(corsOptions2, req, res, next);
+                    corsOptions.origin = origin;
+                    cors2(corsOptions, req, res, next);
                   }
                 });
               } else {
@@ -142651,7 +142651,31 @@ var Voucher = {
         code: import_joi3.default.string().required(),
         idUser: import_joi3.default.string().required(),
         discount: import_joi3.default.number().required(),
-        expirationDate: import_joi3.default.string().isoDate().required()
+        expirationDate: import_joi3.default.string().isoDate().required(),
+        isActive: import_joi3.default.boolean().optional(),
+        quantity: import_joi3.default.number().optional(),
+        usedQuantity: import_joi3.default.number().optional()
+      })
+    },
+    responses: {
+      default: { description: "Successful operation" }
+    }
+  },
+  updateVoucher: {
+    tags: ["Vouchers"],
+    description: "C\u1EADp nh\u1EADt voucher",
+    auth: true,
+    validate: {
+      params: import_joi3.default.object({
+        id: import_joi3.default.string().required()
+      }),
+      payload: import_joi3.default.object({
+        code: import_joi3.default.string().optional(),
+        idUser: import_joi3.default.string().optional(),
+        discount: import_joi3.default.number().optional(),
+        expirationDate: import_joi3.default.string().isoDate().optional(),
+        quantity: import_joi3.default.number().optional(),
+        usedQuantity: import_joi3.default.number().optional()
       })
     },
     responses: {
@@ -142731,6 +142755,7 @@ var swaggerPaths = {
   "/vouchers-info": { get: buildMethod(voucher_default.getVouchers) },
   "/vouchers/user/{idUser}": { get: buildMethod(voucher_default.getVouchersByUser) },
   "/vouchers": { post: buildMethod(voucher_default.createVoucher) },
+  "/vouchers/{id}": { put: buildMethod(voucher_default.updateVoucher) },
   "/products-list": { get: buildMethod(products_default.getProducts) },
   "/products": { post: buildMethod(products_default.createProduct) }
 };
@@ -144559,7 +144584,6 @@ var login = async (req, res) => {
   }
 };
 var logout = async (req, res) => {
-  res.removeHeader("Authorization");
   res.json({ message: "Logout successful" });
 };
 var getProfile = async (req, res) => {
@@ -144585,6 +144609,9 @@ var updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
     const updateData = req.body;
+    if (updateData.password) {
+      updateData.password = await bcryptjs_default.hash(updateData.password, 10);
+    }
     Object.keys(updateData).forEach((key) => {
       if (updateData[key] === "" || updateData[key] === null || updateData[key] === void 0) {
         delete updateData[key];
@@ -144692,7 +144719,9 @@ var VoucherSchema = new import_mongoose3.default.Schema({
   idUser: { type: String, required: true },
   discount: { type: Number, required: true },
   expirationDate: { type: Date, required: true },
-  isActive: { type: Boolean, required: true, default: false }
+  isActive: { type: Boolean, required: true, default: false },
+  quantity: { type: Number, required: true, default: 1 },
+  usedQuantity: { type: Number, required: true, default: 0 }
 });
 var vouchers = import_mongoose3.default.model("Voucher", VoucherSchema);
 var voucher_default2 = vouchers;
@@ -144710,8 +144739,7 @@ var getVouchersByUser = async (req, res) => {
   try {
     const idUser = req.params.idUser;
     const vouchers2 = await voucher_default2.find({
-      idUser,
-      isActive: false
+      idUser
     });
     res.json({ success: true, data: vouchers2 });
   } catch (error) {
@@ -144724,17 +144752,50 @@ var getVouchersByUser = async (req, res) => {
 var createVoucher = async (req, res) => {
   try {
     const { code, idUser, discount, expirationDate, isActive } = req.body;
-    const voucher = new voucher_default2({
-      code,
-      idUser,
-      discount,
-      expirationDate,
-      isActive: isActive ?? true
-    });
-    await voucher.save();
-    res.status(200).json({ success: true, data: voucher });
+    let voucher = await voucher_default2.findOne({ code, idUser });
+    if (voucher) {
+      voucher.quantity = (voucher.quantity || 1) + 1;
+      await voucher.save();
+      return res.status(200).json({ success: true, data: voucher, message: "Voucher quantity increased" });
+    } else {
+      voucher = new voucher_default2({
+        code,
+        idUser,
+        discount,
+        expirationDate,
+        isActive: isActive ?? true,
+        quantity: 1
+      });
+      await voucher.save();
+      return res.status(200).json({ success: true, data: voucher });
+    }
   } catch (error) {
     res.status(500).json({ success: false, message: "Error creating voucher" });
+  }
+};
+var updateVoucher = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { code, idUser, discount, expirationDate, isActive, quantity, usedQuantity } = req.body;
+    const voucher = await voucher_default2.findByIdAndUpdate(
+      id,
+      {
+        code,
+        idUser,
+        discount,
+        expirationDate,
+        isActive: isActive ?? true,
+        quantity,
+        usedQuantity
+      },
+      { new: true }
+    );
+    if (!voucher) {
+      return res.status(404).json({ success: false, message: "Voucher not found" });
+    }
+    res.json({ success: true, data: voucher });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error updating voucher" });
   }
 };
 
@@ -144743,6 +144804,7 @@ var voucherRoutes = (0, import_express3.Router)();
 voucherRoutes.get("/vouchers-info", authMiddleware, getVouchers);
 voucherRoutes.get("/vouchers/user/:idUser", authMiddleware, getVouchersByUser);
 voucherRoutes.post("/vouchers", authMiddleware, createVoucher);
+voucherRoutes.put("/vouchers/:id", authMiddleware, updateVoucher);
 var voucher_default3 = voucherRoutes;
 
 // src/routes/index.ts
@@ -144754,25 +144816,25 @@ var routes_default = router;
 
 // src/app.ts
 var app = (0, import_express5.default)();
+app.use("/documentation", (0, import_cors.default)());
 var allowedOrigins = [
   process.env.NEXT_PUBLIC_URL,
   "http://localhost:3000",
   "http://localhost:5000"
 ];
-var corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error("Not allowed by CORS"));
-  },
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  exposedHeaders: ["Authorization"],
-  credentials: true
-};
-app.use((0, import_cors.default)(corsOptions));
+app.use(
+  (0, import_cors.default)({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Authorization"]
+  })
+);
 app.use(import_express5.default.json());
 app.use(import_express5.default.urlencoded({ extended: true }));
 app.get("/", (req, res) => {
@@ -144781,18 +144843,10 @@ app.get("/", (req, res) => {
     documentation: "/documentation"
   });
 });
-app.get("/api-docs.json", (req, res) => {
-  res.setHeader("Content-Type", "application/json");
-  res.json(swaggerSpec);
-});
 app.use(
   "/documentation",
   import_swagger_ui_express.default.serve,
-  import_swagger_ui_express.default.setup(null, {
-    swaggerOptions: {
-      url: "/api-docs.json"
-    }
-  })
+  import_swagger_ui_express.default.setup(swaggerSpec)
 );
 app.use("/", routes_default);
 var app_default = app;
