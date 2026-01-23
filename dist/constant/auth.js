@@ -8,7 +8,7 @@ const Auth = {
     register: {
         tags: ["Auth"],
         description: "tạo mới user",
-        auth: false,
+        auth: true,
         validate: {
             payload: joi_1.default.object({
                 phone: joi_1.default.string().min(10).max(15).required().example(""),

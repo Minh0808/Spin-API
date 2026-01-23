@@ -4,7 +4,7 @@ const express_1 = require("express");
 const authController_1 = require("../controllers/authController");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const authRouter = (0, express_1.Router)();
-authRouter.post("/register", authController_1.register);
+authRouter.post("/register", authMiddleware_1.authMiddleware, authController_1.register);
 authRouter.post("/login", authController_1.login);
 authRouter.post("/logout", authMiddleware_1.authMiddleware, authController_1.logout);
 authRouter.get("/profile", authMiddleware_1.authMiddleware, authController_1.getProfile);
