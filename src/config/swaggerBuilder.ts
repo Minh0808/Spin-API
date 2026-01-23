@@ -1,3 +1,4 @@
+import { OpenAPIV3 } from "openapi-types";
 import Auth from "../constant/auth";
 import Products from "../constant/products";
 import Voucher from "../constant/voucher";
@@ -15,7 +16,7 @@ const buildMethod = (config: any) => {
     content["multipart/form-data"] = { schema };
   }
 
-  let parameters = [];
+  let parameters: OpenAPIV3.ParameterObject[] = [];
   if (config.validate?.params) {
     const paramsSchema = config.validate.params.describe();
     parameters = Object.keys(paramsSchema.keys).map((key) => ({
