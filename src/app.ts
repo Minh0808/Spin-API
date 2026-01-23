@@ -42,7 +42,11 @@ app.get("/", (req, res) => {
 app.use(
   "/documentation",
   swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec)
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  })
 );
 
 app.use("/", router);

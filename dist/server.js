@@ -144846,7 +144846,11 @@ app.get("/", (req, res) => {
 app.use(
   "/documentation",
   import_swagger_ui_express.default.serve,
-  import_swagger_ui_express.default.setup(swaggerSpec)
+  import_swagger_ui_express.default.setup(swaggerSpec, {
+    swaggerOptions: {
+      persistAuthorization: true
+    }
+  })
 );
 app.use("/", routes_default);
 var app_default = app;
