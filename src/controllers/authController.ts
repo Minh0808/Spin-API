@@ -63,7 +63,6 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
-  res.removeHeader("Authorization");
   res.json({ message: "Logout successful" });
 }
 
@@ -93,6 +92,9 @@ export const updateUser = async (req: Request, res: Response) => {
   try {
     const userId = req.params.id;
     const updateData = req.body;
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
     Object.keys(updateData).forEach(key => {
       if (
         updateData[key] === "" ||
